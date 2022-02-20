@@ -48,4 +48,24 @@ public class PeopleController {
         personDAO.save(person); // добавим человек в БД
         return "redirect:/people";// вернем страницу через редирект
     }
+
+    @GetMapping("/{id}/edit")
+    public String edit(Model model, @PathVariable("id") int id) {
+        model.addAttribute("person", personDAO.show(id));
+        return "people/edit";
+    }
+
+    @PatchMapping("/{id}")
+    public String update(@ModelAttribute("person") Person person, @PathVariable("id") int id) {
+        // ищем человека в БД и меняем его значения на полученные из формы
+        personDAO.update(id, person);
+        return "redirect:/people";
+    }
+
+    @DeleteMapping("/{id}")
+    public String delete(@PathVariable("id") int id) {
+        personDAO.delete(id);
+        return "redirect:/people";
+    }
+
 }
