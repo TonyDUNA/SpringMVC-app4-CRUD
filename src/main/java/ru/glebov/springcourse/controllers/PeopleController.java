@@ -4,10 +4,9 @@ package ru.glebov.springcourse.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import ru.glebov.springcourse.dao.PersonDAO;
+import ru.glebov.springcourse.models.Person;
 
 @Controller
 @RequestMapping("/people") // все адреса в контроллере начинаются со /people
@@ -22,17 +21,31 @@ public class PeopleController {
     }
 
 
-    @GetMapping()// попадаем сюда просто по /people
+    @GetMapping()// попадаем сюда просто по /people - веб форма со списком всех людей
     public String index(Model model) {
         // получим всех людей из DAO и передадим на отображение в представление
         model.addAttribute("people",personDAO.index()); // обратимся к DAO вызовем метод index
         return "people/index"; // вернем список
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id}") // веб форма оображения конкретного чловека
     public String show(@PathVariable("id") int id, Model model) { // извлечем id из урла и используем внутри метода
         // получим одного чела из DAO и передадим на отображение в представление
         model.addAttribute("person",personDAO.show(id));// подключен person, лежит то что пришло из DAO по id
         return "people/show";
+    }
+
+    @GetMapping("/new") // веб-форма для содания нового человека
+    public String newPerson(Model model) { // внедряем модель, для передачи объекта в форму таймлиф
+        model.addAttribute("person", new Person()); // без значения полей, соотв добавим в класс Person пустой конструктор
+
+        return "people/new"; // название таймлиф шаблона
+    }
+
+    @PostMapping() // адрес не передаем, по /people должны попасть в этот метод
+    // получить данные из формы, создать нов чел, положить в него данные из формы, добавить в БД
+        public String create(@ModelAttribute("person") Person person) { // для создания нов. объекта класса Person+положить в него данные из формы
+        personDAO.save(person); // добавим человек в БД
+        return "redirect:/people";// вернем страницу через редирект
     }
 }

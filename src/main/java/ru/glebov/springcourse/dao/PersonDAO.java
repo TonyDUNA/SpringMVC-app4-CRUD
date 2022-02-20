@@ -3,6 +3,7 @@ package ru.glebov.springcourse.dao;
 import org.springframework.stereotype.Component;
 import ru.glebov.springcourse.models.Person;
 
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,5 +32,10 @@ public class PersonDAO {
         // можно использовать цикл for - пройтись по списку, если id совпадает - вернуть значение, если нет null
         // находим человека, возвращаем id, если нет возвращаем null через лямбда выражения java8
         return people.stream().filter(person -> person.getId() == id).findAny().orElse(null);
+    }
+
+    public void save(Person person) {
+        person.setId(++PEOPLE_COUNT); // авто id
+        people.add(person); // добавл объекта
     }
 }
