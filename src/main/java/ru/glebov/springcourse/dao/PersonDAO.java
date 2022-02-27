@@ -16,11 +16,11 @@ public class PersonDAO {
     {
         people = new ArrayList<>();
 
-        people.add(new Person(++PEOPLE_COUNT, "Alex"));
-        people.add(new Person(++PEOPLE_COUNT, "Alim"));
-        people.add(new Person(++PEOPLE_COUNT, "Nora"));
-        people.add(new Person(++PEOPLE_COUNT, "Alla"));
-        people.add(new Person(++PEOPLE_COUNT, "Dora"));
+        people.add(new Person(++PEOPLE_COUNT, "Alex", 24, "alex@mail.ru"));
+        people.add(new Person(++PEOPLE_COUNT, "Alim", 34, "alim@gmail.com"));
+        people.add(new Person(++PEOPLE_COUNT, "Nora", 42, "nora22@mail.ru"));
+        people.add(new Person(++PEOPLE_COUNT, "Alla", 33, "alla@mail.ru"));
+        people.add(new Person(++PEOPLE_COUNT, "Dora", 21, "dora@mail.ru"));
     }
 
     // два метода:
@@ -42,6 +42,8 @@ public class PersonDAO {
     public void update (int id, Person updatedPerson) {
         Person personToBeUpdated = show(id); // с помощью метода show() находим человека из бд и кладем в переменную
         personToBeUpdated.setName(updatedPerson.getName()); // обновим имя человека
+        personToBeUpdated.setAge(updatedPerson.getAge());
+        personToBeUpdated.setEmail(updatedPerson.getEmail());
     }
 
     public void delete (int id) {

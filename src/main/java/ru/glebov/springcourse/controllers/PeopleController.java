@@ -4,9 +4,12 @@ package ru.glebov.springcourse.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.glebov.springcourse.dao.PersonDAO;
 import ru.glebov.springcourse.models.Person;
+
+import javax.validation.Valid;
 
 @Controller
 @RequestMapping("/people") // все адреса в контроллере начинаются со /people
@@ -44,7 +47,10 @@ public class PeopleController {
 
     @PostMapping() // адрес не передаем, по /people должны попасть в этот метод
     // получить данные из формы, создать нов чел, положить в него данные из формы, добавить в БД
-        public String create(@ModelAttribute("person") Person person) { // для создания нов. объекта класса Person+положить в него данные из формы
+        public String create(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult) { // для
+        // создания нов. объекта класса Person+положить в него данные из формы
+        if (bindingResult.hasErrors())
+            return "people/new";
         personDAO.save(person); // добавим человек в БД
         return "redirect:/people";// вернем страницу через редирект
     }
@@ -56,8 +62,12 @@ public class PeopleController {
     }
 
     @PatchMapping("/{id}")
-    public String update(@ModelAttribute("person") Person person, @PathVariable("id") int id) {
+    public String update(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult,
+                         @PathVariable("id") int id) {
         // ищем человека в БД и меняем его значения на полученные из формы
+        if (bindingResult.hasErrors())
+            return "people/edit";
+
         personDAO.update(id, person);
         return "redirect:/people";
     }
