@@ -1,6 +1,5 @@
 package ru.glebov.springcourse.controllers;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,47 +11,41 @@ import ru.glebov.springcourse.models.Person;
 import javax.validation.Valid;
 
 @Controller
-@RequestMapping("/people") // все адреса в контроллере начинаются со /people
+@RequestMapping("/people")
 public class PeopleController {
 
-    // внедряем объект DAO в контроллер
-    private final PersonDAO personDAO; // заводим поле и через конструктор Spring внедряет зависимость в контроллер
+    private final PersonDAO personDAO;
 
     @Autowired
     public PeopleController(PersonDAO personDAO) {
         this.personDAO = personDAO;
     }
 
-
-    @GetMapping()// попадаем сюда просто по /people - веб форма со списком всех людей
+    @GetMapping()
     public String index(Model model) {
-        // получим всех людей из DAO и передадим на отображение в представление
-        model.addAttribute("people",personDAO.index()); // обратимся к DAO вызовем метод index
-        return "people/index"; // вернем список
+        model.addAttribute("people", personDAO.index());
+        return "people/index";
     }
 
-    @GetMapping("/{id}") // веб форма оображения конкретного чловека
-    public String show(@PathVariable("id") int id, Model model) { // извлечем id из урла и используем внутри метода
-        // получим одного чела из DAO и передадим на отображение в представление
-        model.addAttribute("person",personDAO.show(id));// подключен person, лежит то что пришло из DAO по id
+    @GetMapping("/{id}")
+    public String show(@PathVariable("id") int id, Model model) {
+        model.addAttribute("person", personDAO.show(id));
         return "people/show";
     }
 
-    @GetMapping("/new") // веб-форма для содания нового человека
-    public String newPerson(Model model) { // внедряем модель, для передачи объекта в форму таймлиф
-        model.addAttribute("person", new Person()); // без значения полей, соотв добавим в класс Person пустой конструктор
-
-        return "people/new"; // название таймлиф шаблона
+    @GetMapping("/new")
+    public String newPerson(@ModelAttribute("person") Person person) {
+        return "people/new";
     }
 
-    @PostMapping() // адрес не передаем, по /people должны попасть в этот метод
-    // получить данные из формы, создать нов чел, положить в него данные из формы, добавить в БД
-        public String create(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult) { // для
-        // создания нов. объекта класса Person+положить в него данные из формы
+    @PostMapping()
+    public String create(@ModelAttribute("person") @Valid Person person,
+                         BindingResult bindingResult) {
         if (bindingResult.hasErrors())
             return "people/new";
-        personDAO.save(person); // добавим человек в БД
-        return "redirect:/people";// вернем страницу через редирект
+
+        personDAO.save(person);
+        return "redirect:/people";
     }
 
     @GetMapping("/{id}/edit")
@@ -64,7 +57,6 @@ public class PeopleController {
     @PatchMapping("/{id}")
     public String update(@ModelAttribute("person") @Valid Person person, BindingResult bindingResult,
                          @PathVariable("id") int id) {
-        // ищем человека в БД и меняем его значения на полученные из формы
         if (bindingResult.hasErrors())
             return "people/edit";
 
@@ -77,5 +69,4 @@ public class PeopleController {
         personDAO.delete(id);
         return "redirect:/people";
     }
-
 }

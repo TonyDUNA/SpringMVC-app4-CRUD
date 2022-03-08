@@ -1,52 +1,92 @@
 package ru.glebov.springcourse.dao;
-
 import org.springframework.stereotype.Component;
 import ru.glebov.springcourse.models.Person;
 
-import java.security.PublicKey;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Component // для внедрения бина в контроллер
+@Component
 public class PersonDAO {
-    private static int PEOPLE_COUNT; // для динамического id
-    private List<Person> people; // список - БД людей
+    private static int PEOPLE_COUNT;
 
-    // для создания людей - конструктор или блок инициализации
-    {
-        people = new ArrayList<>();
+    private static final String URL = "jdbc:postgresql://localhost:5432/first_db";
+    private static final String USERNAME = "postgres";
+    private static final String PASSWORD = "postgres";
 
-        people.add(new Person(++PEOPLE_COUNT, "Alex", 24, "alex@mail.ru"));
-        people.add(new Person(++PEOPLE_COUNT, "Alim", 34, "alim@gmail.com"));
-        people.add(new Person(++PEOPLE_COUNT, "Nora", 42, "nora22@mail.ru"));
-        people.add(new Person(++PEOPLE_COUNT, "Alla", 33, "alla@mail.ru"));
-        people.add(new Person(++PEOPLE_COUNT, "Dora", 21, "dora@mail.ru"));
+    private static Connection connection;
+
+    static {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            connection = DriverManager.getConnection(URL, USERNAME, PASSWORD);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
     }
 
-    // два метода:
-    public List<Person> index() { // возвращает список людей
+    public List<Person> index() {
+        List<Person> people = new ArrayList<>();
+
+        try {
+            Statement statement = connection.createStatement();
+            String SQL = "SELECT * FROM Person";
+            ResultSet resultSet = statement.executeQuery(SQL);
+
+            while(resultSet.next()) {
+                Person person = new Person();
+
+                person.setId(resultSet.getInt("id"));
+                person.setName(resultSet.getString("name"));
+                person.setEmail(resultSet.getString("email"));
+                person.setAge(resultSet.getInt("age"));
+
+                people.add(person);
+            }
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
         return people;
     }
 
     public Person show(int id) {
-        // можно использовать цикл for - пройтись по списку, если id совпадает - вернуть значение, если нет null
-        // находим человека, возвращаем id, если нет возвращаем null через лямбда выражения java8
-        return people.stream().filter(person -> person.getId() == id).findAny().orElse(null);
+//        return people.stream().filter(person -> person.getId() == id).findAny().orElse(null);
+        return null;
     }
 
     public void save(Person person) {
-        person.setId(++PEOPLE_COUNT); // авто id
-        people.add(person); // добавл объекта
+//        person.setId(++PEOPLE_COUNT);
+//        people.add(person);
+
+        try {
+            Statement statement = connection.createStatement();
+            String SQL = "INSERT INTO Person VALUES(" + 1 + ",'" + person.getName() +
+                    "'," + person.getAge() + ",'" + person.getEmail() + "')";
+
+            statement.executeUpdate(SQL);
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+
+
     }
 
-    public void update (int id, Person updatedPerson) {
-        Person personToBeUpdated = show(id); // с помощью метода show() находим человека из бд и кладем в переменную
-        personToBeUpdated.setName(updatedPerson.getName()); // обновим имя человека
-        personToBeUpdated.setAge(updatedPerson.getAge());
-        personToBeUpdated.setEmail(updatedPerson.getEmail());
+    public void update(int id, Person updatedPerson) {
+//        Person personToBeUpdated = show(id);
+//
+//        personToBeUpdated.setName(updatedPerson.getName());
+//        personToBeUpdated.setAge(updatedPerson.getAge());
+//        personToBeUpdated.setEmail(updatedPerson.getEmail());
     }
 
-    public void delete (int id) {
-        people.removeIf(p -> p.getId() == id); // лямда выражение, если id -тру то удаляем из списка
+    public void delete(int id) {
+//        people.removeIf(p -> p.getId() == id);
     }
 }
